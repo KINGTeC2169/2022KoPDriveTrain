@@ -11,6 +11,10 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.ControlFrame;
+import com.ctre.phoenix.motorcontrol.ControlMode;
+
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
 
 /**
@@ -20,13 +24,10 @@ import edu.wpi.first.wpilibj.motorcontrol.Talon;
  * directory.
  */
 public class Robot extends TimedRobot {
-  private final Talon m_leftDrive = new Talon(2);
-  private final Talon s_leftDrive = new Talon(3);
-  private final Talon m_rightDrive = new Talon(0);
-  private final Talon s_rightDrive = new Talon(1);
-  private final MotorControllerGroup l_robotDrive = new MotorControllerGroup(m_leftDrive, s_leftDrive);
-  private final MotorControllerGroup r_robotDrive = new MotorControllerGroup(m_rightDrive, s_rightDrive);
-  private final DifferentialDrive m_robotDrive = new DifferentialDrive(l_robotDrive, r_robotDrive);
+  private final TalonSRX m_leftDrive = new TalonSRX(2);
+  private final TalonSRX s_leftDrive = new TalonSRX(3);
+  private final TalonSRX m_rightDrive = new TalonSRX(0);
+  private final TalonSRX s_rightDrive = new TalonSRX(1);
   private final XboxController controller = new XboxController(2);
   private final Timer m_timer = new Timer();
 
@@ -36,10 +37,13 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
+    
     // We need to invert one side of the drivetrain so that positive voltages
     // result in both sides moving forward. Depending on how your robot's
     // gearbox is constructed, you might have to invert the left side instead.
-    m_rightDrive.setInverted(true);
+    s_leftDrive.follow(m_leftDrive);
+    s_rightDrive.follow(m_rightDrive);
+    //m_rightDrive.setInverted(true);
     m_leftDrive.setInverted(true);
   }
 
@@ -54,11 +58,6 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousPeriodic() {
     // Drive for 2 seconds
-    if (m_timer.get() < 2.0) {
-      m_robotDrive.arcadeDrive(0.5, 0.0); // drive forwards half speed
-    } else {
-      m_robotDrive.stopMotor(); // stop robot
-    }
   }
 
   /** This function is called once each time the robot enters teleoperated mode. */
@@ -68,7 +67,8 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during teleoperated mode. */
   @Override
   public void teleopPeriodic() {
-    m_robotDrive.tankDrive(controller.getLeftY(), controller.getRightY());
+    m_rightDrive.set(ControlMode.PercentOutput, controller.getRightY());
+    m_leftDrive.set(ControlMode.PercentOutput, controller.getLeftY());
   }
 
   /** This function is called once each time the robot enters test mode. */
