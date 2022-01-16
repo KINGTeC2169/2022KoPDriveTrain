@@ -4,18 +4,9 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
-import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-import com.ctre.phoenix.motorcontrol.ControlFrame;
-import com.ctre.phoenix.motorcontrol.ControlMode;
-
-import edu.wpi.first.wpilibj.motorcontrol.Talon;
+import frc.robot.operationCommands.CommandMachine;
+import frc.robot.subsystems.DriveTrain;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -24,40 +15,22 @@ import edu.wpi.first.wpilibj.motorcontrol.Talon;
  * directory.
  */
 public class Robot extends TimedRobot {
-  private final TalonSRX m_leftDrive = new TalonSRX(2);
-  private final TalonSRX s_leftDrive = new TalonSRX(3);
-  private final TalonSRX m_rightDrive = new TalonSRX(0);
-  private final TalonSRX s_rightDrive = new TalonSRX(1);
-  private final XboxController controller = new XboxController(2);
-  private final Timer m_timer = new Timer();
+  private DriveTrain driveTrain;
+    private CommandMachine commandMachine;
 
-  /**
-   * This function is run when the robot is first started up and should be used for any
-   * initialization code.
-   */
   @Override
   public void robotInit() {
-    
-    // We need to invert one side of the drivetrain so that positive voltages
-    // result in both sides moving forward. Depending on how your robot's
-    // gearbox is constructed, you might have to invert the left side instead.
-    s_leftDrive.follow(m_leftDrive);
-    s_rightDrive.follow(m_rightDrive);
-    //m_rightDrive.setInverted(true);
-    m_leftDrive.setInverted(true);
+    driveTrain = new DriveTrain();
   }
 
   /** This function is run once each time the robot enters autonomous mode. */
   @Override
   public void autonomousInit() {
-    m_timer.reset();
-    m_timer.start();
   }
 
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-    // Drive for 2 seconds
   }
 
   /** This function is called once each time the robot enters teleoperated mode. */
@@ -67,8 +40,8 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during teleoperated mode. */
   @Override
   public void teleopPeriodic() {
-    m_rightDrive.set(ControlMode.PercentOutput, controller.getRightY());
-    m_leftDrive.set(ControlMode.PercentOutput, controller.getLeftY());
+      driveTrain.handle(commandMachine.generateDriveCommand());
+
   }
 
   /** This function is called once each time the robot enters test mode. */
