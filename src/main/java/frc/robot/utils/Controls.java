@@ -4,38 +4,28 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 
 public class Controls {
+    private static XboxController controller = new XboxController(ActuatorMap.controller);
+    private static Joystick leftJoy = new Joystick(ActuatorMap.leftJoystick);
+    private static Joystick rightJoy = new Joystick(ActuatorMap.rightJoystick);
 
-    private static final int leftJoyPort = 1;
-    private static final int rightJoyPort = 2;
-    private static final int controllerPort = 0;
-
-    private final Joystick leftJoy;
-    private final Joystick rightJoy;
-    private final XboxController controller;
-
-    public Controls() {
-        leftJoy = new Joystick(leftJoyPort);
-        rightJoy = new Joystick(rightJoyPort);
-        controller = new XboxController(controllerPort);
+    public static double getLeftX() {
+        return controller.getLeftX();
     }
 
-    public double getLeftJoyX(){
-        return leftJoy.getX();
+    public static double getLeftY() {
+        return controller.getLeftY();
     }
 
-    public double getLeftJoyY() {
-        return leftJoy.getY();
+    public static double getRightX() {
+        return controller.getRightX();
     }
 
-    public double getRightJoyX(){
-        return rightJoy.getX();
+    public static double getRightY() {
+        return controller.getRightY();
     }
-
-    public double getRightJoyY() {
-        return rightJoy.getY();
-    }
-
-    public double getRightJoyTwist() {
-        return rightJoy.getTwist();
+    
+    public static double getRightTwist() {
+        return controller.getLeftTriggerAxis();
+    
     }
 }
