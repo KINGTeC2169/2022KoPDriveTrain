@@ -21,6 +21,7 @@ public class Controls {
     }
 
     public static double getRightY() {
+        System.out.print("balls");
         return controller.getRightY();
     }
     

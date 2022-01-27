@@ -4,14 +4,28 @@
 
 package frc.robot;
 
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.*;
+import java.lang.*;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DigitalOutput;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.motorcontrol.MotorController;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.auto.LLDistancePrint;
+import frc.robot.auto.LLFollow;
 import frc.robot.utils.Controls;
+import frc.robot.utils.LimeLightManager;
 import frc.robot.utils.MotorManager;
 
 /**
@@ -21,68 +35,70 @@ import frc.robot.utils.MotorManager;
  * project.
  */
 public class Robot extends TimedRobot {
-  
 
+  
+  //SendableChooser<Object> m_chooser = new SendableChooser<>();
   @Override
   public void robotInit() {
+    //private final Command jeffery = new LLDistancePrint();
+   // m_chooser.setDefaultOption("banana Pepper", new LLDistancePrint());
+    //m_chooser.addOption("sllab",new LLDistancePrint());
+    //SmartDashboard.putData(m_chooser);
   }
 
   @Override
   public void robotPeriodic() {}
 
+  SendableChooser chooser;
   @Override
-  public void autonomousInit() {}
+  public void autonomousInit() {
+    chooser = new SendableChooser<Command>();
+  }
 
   @Override
   public void autonomousPeriodic() {
-    NetworkTable limeLight = NetworkTableInstance.getDefault().getTable("limelight");
-     double xOffset = limeLight.getEntry("tx").getDouble(500);
-     System.out.println(xOffset);
-     double right = 0;
-     double left = 0;
-     if((int) xOffset > 5) {
-      right = Math.abs(xOffset) * .01;
-       left = -Math.abs(xOffset) * .01;
-     }
-     if((int) xOffset < 5) {
-      right = -Math.abs(xOffset) * .01;
-      left = Math.abs(xOffset) * .01;
-     }
-
-     if(Math.abs(xOffset) < 5) {
-      left = -.5;
-      right = -.5;
-    }
-    if(left < .2 && left > 0) {
-      left = .2;
-    }
-    if(right < .2 && right > 0) {
-      right = .2;
-    }
-    if(left < -.2 && left < 0) {
-      left = -.2;
-    }
-    if(right < -.2 && right < 0) {
-      right = -.2;
-    }
-    if(xOffset == 0.0) {
-      right = 0.0;
-      left = 0.0;
-
-   }
-    MotorManager.RightDrivePower(right);
-    MotorManager.leftDrivePower(left);
+    chooser.addOption("cat", new LLDistancePrint());
+    //if(m_chooser.getSelected().equals("sllab")) {
+      
+    //}
   }
 
+  DigitalInput balls;
   @Override
   public void teleopInit() {
+    balls = new DigitalInput(3);
+    CameraServer.startAutomaticCapture();
+    MotorManager.resetEncoderPosition();
   }
 
+  double prevPosition;
+  double prevTime;
+  double currentPosition;
+  double currentTime;
+  
   @Override
   public void teleopPeriodic() {
-    NetworkTable limeLight = NetworkTableInstance.getDefault().getTable("limelight");
-    double xOffset = limeLight.getEntry("ty").getDouble(0);
-    System.out.println((94) / Math.tan(((45+xOffset) * Math.PI)/180));
+    //DigitalOutput balls = new DigitalOutput(0);\
+    //Rev Bore encoder divide by 22.76 to get percentage and 8192 SPR
+    //Falcon 500 divide by 5.69 to get percentage and 2048 SPR
+    prevPosition = MotorManager.getEncoderPosition();
+    prevTime = System.currentTimeMillis();
+  
+    currentPosition = MotorManager.getEncoderPosition();
+    currentTime = System.currentTimeMillis();
+
+    currentPosition -= prevPosition;
+    currentPosition /= 8192;
+    currentTime -= prevTime;
+    currentTime /= 60000;
+    //System.out.println(currentTime);
+  System.out.println(600 * MotorManager.getEncoderVelocity() / 8192);
+
+
+
+    //System.out.println((94) / Math.tan(((45+LimeLightManager.getXPercent()) * Math.PI)/180));
+   // DriveTrain.Drive();
+
   }
 
   @Override
@@ -92,35 +108,32 @@ public class Robot extends TimedRobot {
   public void disabledPeriodic() { 
   }
 
+
   @Override
   public void testInit() {
     CameraServer.startAutomaticCapture();
-    NetworkTable limeLight = NetworkTableInstance.getDefault().getTable("limelight");
   }
 
   @Override
   public void testPeriodic() {
-    
-    double xOffset = limeLight.getEntry("tx").getDouble(0);
 
-    if(Controls.getLeftX() != 0) {
-          MotorManager.leftDrivePower(-Controls.getLeftX());
-          MotorManager.RightDrivePower(Controls.getLeftX());
+    if(Math.abs(Controls.getLeftX()) > .1 || Math.abs(Controls.getLeftY()) >  .1) {
+          MotorManager.leftDrivePower(Controls.getLeftY() - Controls.getLeftX());
+          MotorManager.RightDrivePower(Controls.getLeftY() + Controls.getLeftX());
     } else {
 
 
-        System.out.println(xOffset);
-        if(xOffset < 4 && xOffset > -4) {
-          System.out.println("balls 4");
+        System.out.println(LimeLightManager.getXPercent());
+        if(LimeLightManager.getXPercent() < 2 && LimeLightManager.getXPercent() > -2) {
           MotorManager.Stop();
         }
-        if(xOffset < -5) {
-          MotorManager.leftDrivePower(-xOffset * .01);
-          MotorManager.RightDrivePower(xOffset * .01);
+        if(LimeLightManager.getXPercent() < -2.5) {
+          MotorManager.leftDrivePower(-LimeLightManager.getXPercent() * .025);
+          MotorManager.RightDrivePower(LimeLightManager.getXPercent() * .025);
         }
-        if(xOffset > 5) {
-          MotorManager.leftDrivePower(-xOffset * .01);
-          MotorManager.RightDrivePower(xOffset * .01);
+        if(LimeLightManager.getXPercent() > 2.5) {
+          MotorManager.leftDrivePower(-LimeLightManager.getXPercent() * .025);
+          MotorManager.RightDrivePower(LimeLightManager.getXPercent() * .025);
         }
         
 
