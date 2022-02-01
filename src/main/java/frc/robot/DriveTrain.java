@@ -13,13 +13,14 @@ public class DriveTrain {
     public static final double kThrottleDeadband = 0.02;
     private static final double kWheelDeadband = 0.02;
     private static final double kTurnSensitivity = 1.0;
+    double mQuickStopAccumulator;
 
     public static void Drive() {
-        double mQuickStopAccumulator = 0;
+        
 
         double throttle = Controls.getLeftY();
-        double wheel = Controls.getRightTwist() != 0 ? Controls.getRightTwist() : Controls.getRightX();
-        boolean isQuickTurn = Controls.getRightTwist() != 0;
+        double wheel = Controls.getRightX();
+        boolean isQuickTurn = false;
 
         double overPower;
 

@@ -9,24 +9,24 @@ public class Controls {
     private static Joystick rightJoy = new Joystick(ActuatorMap.rightJoystick);
 
     public static double getLeftX() {
-        return controller.getLeftX();
+        return leftJoy.getX();
     }
 
     public static double getLeftY() {
-        return controller.getLeftY();
+        return leftJoy.getY();
     }
 
     public static double getRightX() {
-        return controller.getRightX();
+        return rightJoy.getX();
     }
 
     public static double getRightY() {
         System.out.print("balls");
-        return controller.getRightY();
+        return rightJoy.getY();
     }
     
     public static double getRightTwist() {
-        return controller.getLeftTriggerAxis();
+        return rightJoy.getTwist();
     
     }
 }
